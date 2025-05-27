@@ -24,4 +24,5 @@ ENV SHELL=/bin/bash \
 EXPOSE ${PORT}
 
 # Start ttyd in debug mode using bash
-CMD ["ttyd", "-d", "2", "-p", "7681", "bash"]
+CMD ["ttyd", "-d", "2", "--writable", "-p", "7681", "bash"]
+
