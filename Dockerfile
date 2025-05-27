@@ -1,10 +1,27 @@
-FROM alpine:latest
+# Use Ubuntu as the base image
+FROM ubuntu:22.04
 
-# Install bash and ttyd
-RUN apk add --no-cache bash ttyd
+# Install dependencies
+RUN apt update && \
+    DEBIAN_FRONTEND=noninteractive apt install -y \
+    git cmake g++ libjson-c-dev libwebsockets-dev libssl-dev \
+    zlib1g-dev bash curl wget build-essential
 
-# Expose port 8080 (ttyd default)
-EXPOSE 8080
+# Clone and build ttyd from source
+RUN git clone https://github.com/tsl0922/ttyd.git && \
+    cd ttyd && mkdir build && cd build && \
+    cmake .. && make && make install
 
-# Run ttyd serving bash shell on port 8080
-CMD ["ttyd", "-p", "8080", "bash"]
+# Clean up to reduce image size
+RUN apt clean && rm -rf /var/lib/apt/lists/* /ttyd
+
+# Set environment variables
+ENV SHELL=/bin/bash \
+    PORT=7681 \
+    DEBUG=2
+
+# Expose the port
+EXPOSE ${PORT}
+
+# Start ttyd in debug mode using bash
+CMD ["ttyd", "-d", "2", "-p", "7681", "bash"]
